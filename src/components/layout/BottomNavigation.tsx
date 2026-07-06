@@ -74,7 +74,7 @@ export function BottomNavigation({ onOpenProfile }: BottomNavigationProps) {
   const handleLogout = async () => {
     setShowMore(false);
     await logout();
-    window.location.href = import.meta.env.BASE_URL + "login";
+    // Redirect ditangani secara otomatis oleh AppRoutes menggunakan wouter
   };
 
   return (

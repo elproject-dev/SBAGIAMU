@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronLeft, CreditCard, Banknote, QrCode, Award, Building2, User, History, SlidersHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,6 +61,7 @@ const getPointsSettingsForUser = (user: any) => {
 };
 
 export default function TransactionsPage() {
+  const [, setLocation] = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<string>("all");
   const [page, setPage] = useState<number>(1);
   const [outletFilter, setOutletFilter] = useState<string>("all");
@@ -441,7 +442,7 @@ export default function TransactionsPage() {
                     <TableRow
                       key={trx.id}
                       className="border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:shadow-sm relative hover:z-10 transition-all duration-200 cursor-pointer"
-                      onClick={() => window.location.href = `${import.meta.env.BASE_URL}transactions/${trx.id}`}
+                      onClick={() => setLocation(`/transactions/${trx.id}`)}
                     >
                       <TableCell>
                         <div className="font-medium">{formatInvoiceNumber(trx.id)}</div>

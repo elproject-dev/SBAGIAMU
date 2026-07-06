@@ -215,7 +215,7 @@ export function ProfileContent() {
           className="w-full text-xs h-8"
           onClick={async () => {
             await logout();
-            window.location.href = import.meta.env.BASE_URL + "login";
+            // Redirect ditangani secara otomatis oleh AppRoutes menggunakan wouter
           }}
         >
           <LogOut className="w-3.5 h-3.5 mr-1.5" />
