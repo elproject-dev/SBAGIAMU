@@ -1,0 +1,112 @@
+import { supabase } from './supabase';
+import { APP_VERSION, isUpdateAvailable, type UpdateInfo } from './version';
+
+const SESSION_CACHE_KEY = 'sbagiamu_update_checked';
+const SKIP_VERSION_KEY = 'sbagiamu_skip_version';
+
+/**
+ * Ambil konfigurasi update dari tabel app_config di Supabase
+ */
+async function fetchRemoteConfig(): Promise<Record<string, string>> {
+  const { data, error } = await supabase
+    .from('app_config')
+    .select('key, value');
+
+  if (error) {
+    console.warn('[UpdateChecker] Gagal fetch remote config:', error.message);
+    return {};
+  }
+
+  const config: Record<string, string> = {};
+  if (data) {
+    for (const row of data) {
+      config[row.key] = row.value;
+    }
+  }
+
+  return config;
+}
+
+/**
+ * Parse changelog dari string JSON ke array
+ */
+function parseChangelog(raw: string | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // Jika bukan JSON, coba split by newline atau return as single item
+    return raw.split('\n').filter(Boolean);
+  }
+}
+
+/**
+ * Cek apakah ada update tersedia
+ * @param forceCheck - bypass session cache (untuk cek manual dari Settings)
+ */
+export async function checkForUpdate(forceCheck = false): Promise<UpdateInfo | null> {
+  // Cek session cache — hanya cek 1x per sesi kecuali force
+  if (!forceCheck) {
+    const cached = sessionStorage.getItem(SESSION_CACHE_KEY);
+    if (cached === 'true') {
+      return null;
+    }
+  }
+
+  try {
+    const config = await fetchRemoteConfig();
+
+    // Tandai sudah dicek untuk sesi ini
+    sessionStorage.setItem(SESSION_CACHE_KEY, 'true');
+
+    const latestVersion = config['app_version_latest'] || APP_VERSION;
+    const forceUpdate = config['force_update'] === 'true';
+    const downloadUrl = config['download_url'] || 'https://play.google.com/store/apps/details?id=com.sbagiamu.app';
+    const title = config['update_title'] || 'Update Tersedia! 🚀';
+    const message = config['update_message'] || 'Versi terbaru sudah tersedia dengan fitur dan perbaikan baru.';
+    const changelog = parseChangelog(config['update_changelog']);
+
+    const hasUpdate = isUpdateAvailable(APP_VERSION, latestVersion);
+
+    // Cek apakah user sudah skip versi ini (kecuali force update)
+    if (hasUpdate && !forceUpdate && !forceCheck) {
+      const skippedVersion = localStorage.getItem(SKIP_VERSION_KEY);
+      if (skippedVersion === latestVersion) {
+        return null; // User sudah skip versi ini
+      }
+    }
+
+    if (!hasUpdate) {
+      return null;
+    }
+
+    return {
+      latestVersion,
+      currentVersion: APP_VERSION,
+      forceUpdate,
+      downloadUrl,
+      title,
+      message,
+      changelog,
+      hasUpdate,
+    };
+  } catch (error) {
+    console.warn('[UpdateChecker] Error saat cek update:', error);
+    return null;
+  }
+}
+
+/**
+ * Tandai versi tertentu sebagai "di-skip" oleh user
+ */
+export function skipVersion(version: string): void {
+  localStorage.setItem(SKIP_VERSION_KEY, version);
+}
+
+/**
+ * Reset session cache agar bisa cek ulang
+ */
+export function resetUpdateCache(): void {
+  sessionStorage.removeItem(SESSION_CACHE_KEY);
+}

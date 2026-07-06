@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    "types": ["vite/client", "node"],
+
+    "paths": {
+      "@/*": ["./src/*"],
+      "@workspace/api-client-react": ["./src/mocks/api-client-react.ts"],
+      "stream": ["./src/mocks/stream-mock.js"]
+    }
+  },
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"]
+}
