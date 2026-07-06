@@ -35,6 +35,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://qlqzjxeejgvtroxjqwmo.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFscXpqeGVlamd2dHJveGpxd21vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMTQ2ODgsImV4cCI6MjA5ODg5MDY4OH0.GwNdXF1cHDom_1oXWBI9-NvEZtrqmZ-w-SDtTWFPM2g
+      - name: Generate 404.html for SPA routing
+        run: cp dist/index.html dist/404.html
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
