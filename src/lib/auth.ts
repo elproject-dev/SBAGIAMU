@@ -176,7 +176,7 @@ export async function registerWithSupabase(
     email: normalizedEmail,
     phone,
     role: 'kasir',
-    status: 'active',
+    status: 'inactive',
     owner_id: authData.user.id
   }]);
 
@@ -186,7 +186,6 @@ export async function registerWithSupabase(
   }
 
   const user = buildAuthUser(authData.user, "kasir");
-  saveSession(user);
 
   // We sign out to match the login architecture (using anon key for public RLS)
   await supabase.auth.signOut();

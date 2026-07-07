@@ -802,3 +802,27 @@ input:-webkit-autofill:active {
     transform: translateX(100%);
   }
 }
+
+/* Arrow Slide Right Animation */
+.animate-arrow-slide {
+  animation: arrowSlideRight 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowSlideRight {
+  0% {
+    transform: translateX(-12px);
+    opacity: 0;
+  }
+  30% {
+    transform: translateX(-4px);
+    opacity: 1;
+  }
+  70% {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(12px);
+    opacity: 0;
+  }
+}

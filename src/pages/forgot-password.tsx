@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { useLocation, Link } from "wouter";
 import { Mail, Send, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,8 +41,12 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
+      const origin = Capacitor.isNativePlatform() 
+        ? 'https://elproject-dev.github.io' 
+        : window.location.origin;
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}update-password`,
+        redirectTo: `${origin}${import.meta.env.BASE_URL}update-password`,
       });
 
       if (error) throw error;

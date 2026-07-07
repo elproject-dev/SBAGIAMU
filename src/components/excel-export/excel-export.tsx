@@ -933,13 +933,8 @@ export function DownloadExcelDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm mx-auto max-h-[90vh] overflow-y-auto scrollbar-slim">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileDown className="w-5 h-5 text-primary" />
-            Download Laporan
-          </DialogTitle>
-          <DialogDescription className="text-xs">
-            Pilih periode dan filter untuk download laporan Excel
-          </DialogDescription>
+          <DialogTitle className="hidden">Download Laporan</DialogTitle>
+          <DialogDescription className="hidden">Download laporan Excel</DialogDescription>
         </DialogHeader>
 
         {/* Filter Section - Only show for admin */}
@@ -989,7 +984,7 @@ export function DownloadExcelDialog({
 
         {/* Date Filter - Available to all users */}
         <div className="space-y-2 mt-3">
-          <Label className="text-xs font-medium text-slate-500">Rentang Tanggal (Opsional)</Label>
+          <Label className="text-xs font-medium text-slate-500">Rentang Tanggal</Label>
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
             <div className="relative w-full h-9">
               <Input
@@ -1037,66 +1032,24 @@ export function DownloadExcelDialog({
               disabled={isDownloading}
               className="w-full h-9 text-xs mt-1"
             >
-              Download Laporan (Rentang Tanggal)
+              Download Laporan
             </Button>
           )}
-        </div>
 
-        <div className="space-y-3 py-4 border-t mt-4">
-          <button
-            onClick={handleExportToday}
-            disabled={isDownloading}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors border-2 border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <p className="font-medium text-slate-700 truncate">Hari Ini</p>
-              <p className="text-xs text-slate-500 font-normal truncate">
-                {selectedOutlet === "all" ? "Semua outlet" : `Outlet: ${outlets.find(o => o.id.toString() === selectedOutlet)?.name || selectedOutlet}`}
-                {selectedCashier !== "all" && ` | Kasir: ${selectedCashier}`}
-              </p>
-            </div>
-          </button>
-
-          <button
-            onClick={handleExportThisMonth}
-            disabled={isDownloading}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors border-2 border-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <p className="font-medium text-slate-700 truncate">Bulan Ini</p>
-              <p className="text-xs text-slate-500 font-normal truncate">
-                {selectedOutlet === "all" ? "Semua outlet" : `Outlet: ${outlets.find(o => o.id.toString() === selectedOutlet)?.name || selectedOutlet}`}
-                {selectedCashier !== "all" && ` | Kasir: ${selectedCashier}`}
-              </p>
-            </div>
-          </button>
-
-          <button
-            onClick={handleExportAllTransactions}
-            disabled={isDownloading}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors border-2 border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center shrink-0">
-              <History className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <p className="font-medium text-slate-700 truncate">Semua Transaksi</p>
-              <p className="text-xs text-slate-500 font-normal truncate">
-                {selectedOutlet === "all" ? "Semua outlet" : `Outlet: ${outlets.find(o => o.id.toString() === selectedOutlet)?.name || selectedOutlet}`}
-                {selectedCashier !== "all" && ` | Kasir: ${selectedCashier}`}
-              </p>
-            </div>
-          </button>
-
-          {/* Transaction count below buttons */}
-          <p className="text-xs text-slate-500 text-center pt-2">
-            {filteredTransactions.length} transaksi ditemukan
+          <p className="text-xs text-slate-500 text-center pt-3 pb-1">
+            {(() => {
+              let count = filteredTransactions.length;
+              if (startDate && endDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                if (start <= end) {
+                  count = filterTransactionsByRange(filteredTransactions, start, end).length;
+                }
+              }
+              return `${count} transaksi ditemukan`;
+            })()}
           </p>
         </div>
 

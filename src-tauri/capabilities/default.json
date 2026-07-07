@@ -16,6 +16,8 @@
     "fs:allow-desktop-write",
     "fs:allow-download-read",
     "fs:allow-document-read",
-    "fs:allow-desktop-read"
+    "fs:allow-desktop-read",
+    "updater:default",
+    "process:default"
   ]
 }

@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check if user is inactive
         if (data.status === 'inactive') {
           await logoutAuth();
-          throw new Error("Akun Anda telah dinonaktifkan. Silakan hubungi admin.");
+          throw new Error("Akun Anda belum aktif atau telah dinonaktifkan. Silakan hubungi Admin.");
         }
 
         if ('owner_id' in data && !data.owner_id) {
@@ -214,7 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (email: string, password: string, name: string, phone: string) => {
     try {
       const authUser = await registerWithSupabase(email, password, name, phone);
-      setUser(authUser);
+      // Jangan otomatis login (setUser) setelah registrasi
       return authUser;
     } catch (error) {
       throw error;

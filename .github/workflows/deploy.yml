@@ -33,8 +33,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_SUPABASE_URL: https://qlqzjxeejgvtroxjqwmo.supabase.co
-          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFscXpqeGVlamd2dHJveGpxd21vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMTQ2ODgsImV4cCI6MjA5ODg5MDY4OH0.GwNdXF1cHDom_1oXWBI9-NvEZtrqmZ-w-SDtTWFPM2g
+          GITHUB_PAGES: true
+          VITE_SUPABASE_URL: https://wnozfcqgcmvxvkxbxgfj.supabase.co
+          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indub3pmY3FnY212eHZreGJ4Z2ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDIwMjMsImV4cCI6MjA5ODkxODAyM30.00v4HUxsKgNxupMPdWMo6XeWxWKrX7B7qRXhoh1cttg
       - name: Generate 404.html for SPA routing
         run: cp dist/index.html dist/404.html
       - name: Setup Pages

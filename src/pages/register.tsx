@@ -67,11 +67,11 @@ export default function RegisterPage() {
     try {
       const sessionUser = await register(email, password, name, phone);
       toast({
-        title: "Registrasi berhasil",
-        description: `Selamat datang, ${sessionUser.name}. Akun kasir Anda siap digunakan!`,
+        title: "Registrasi Berhasil",
+        description: "Akun Anda sedang dalam status tunggu. Silakan hubungi Admin untuk aktivasi.",
         variant: "success",
       });
-      setLocation(getDefaultRoute(sessionUser));
+      setLocation("/login");
     } catch (error) {
       toast({
         title: "Registrasi gagal",

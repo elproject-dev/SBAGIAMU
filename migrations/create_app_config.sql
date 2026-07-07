@@ -16,8 +16,8 @@ INSERT INTO app_config (key, value) VALUES
   ('app_version_latest', '1.0.0'),
   ('force_update', 'false'),
   ('download_url', 'https://play.google.com/store/apps/details?id=com.sbagiamu.app'),
-  ('update_title', 'Update Tersedia! 🚀'),
-  ('update_message', 'Versi terbaru sudah tersedia dengan fitur dan perbaikan baru.'),
+  ('update_title', 'Update Tersedia!'),
+  ('update_message', 'Versi terbaru sudah tersedia saat ini.'),
   ('update_changelog', '["Perbaikan bug","Peningkatan performa","Fitur Update"]')
 ON CONFLICT (key) DO NOTHING;
 

@@ -15,6 +15,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ProfileDialog } from "@/components/layout/ProfileDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Online/Offline state
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -390,39 +392,21 @@ export default function DashboardPage() {
             </Popover>
 
             {/* Profile Photo - Clickable Popover */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="relative inline-flex items-center justify-center shrink-0 border-0 bg-transparent p-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full transition-transform hover:scale-105" title="Profil Pengguna">
-                  <div className={`absolute inset-0 rounded-full animate-ping opacity-40 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
-                  <div className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base font-bold shadow-md border-2 animate-ring ${isOnline ? 'border-emerald-500 text-emerald-700 bg-emerald-50' : 'border-red-500 text-red-700 bg-red-50'}`}>
-                    {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"
-                    )}
-                  </div>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-64 p-0 rounded-xl shadow-xl border-slate-100 dark:border-slate-800">
-                <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{user?.name || "Pengguna"}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{user?.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline" className="text-[10px] uppercase font-semibold text-primary border-primary/20 bg-primary/5">{user?.role || 'Staff'}</Badge>
-                    <Badge variant="outline" className="text-[10px] uppercase font-semibold text-emerald-600 border-emerald-600/20 bg-emerald-600/5 flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                      {isOnline ? 'Online' : 'Offline'}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="p-2">
-                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 font-medium" onClick={() => logout()}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Keluar Akun
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <button 
+              onClick={() => setIsProfileOpen(true)}
+              className="relative inline-flex items-center justify-center shrink-0 border-0 bg-transparent p-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full transition-transform hover:scale-105" 
+              title="Profil Pengguna"
+            >
+              <div className={`absolute inset-0 rounded-full animate-ping opacity-40 ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+              <div className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base font-bold shadow-md border-2 animate-ring ${isOnline ? 'border-emerald-500 text-emerald-700 bg-emerald-50' : 'border-red-500 text-red-700 bg-red-50'}`}>
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"
+                )}
+              </div>
+            </button>
+            <ProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
           </div>
         </div>
 

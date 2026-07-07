@@ -63,8 +63,8 @@ export async function checkForUpdate(forceCheck = false): Promise<UpdateInfo | n
     const latestVersion = config['app_version_latest'] || APP_VERSION;
     const forceUpdate = config['force_update'] === 'true';
     const downloadUrl = config['download_url'] || 'https://play.google.com/store/apps/details?id=com.sbagiamu.app';
-    const title = config['update_title'] || 'Update Tersedia! 🚀';
-    const message = config['update_message'] || 'Versi terbaru sudah tersedia dengan fitur dan perbaikan baru.';
+    const title = config['update_title'] || 'Update Tersedia!';
+    const message = config['update_message'] || 'Versi terbaru sudah tersedia saat ini.';
     const changelog = parseChangelog(config['update_changelog']);
 
     const hasUpdate = isUpdateAvailable(APP_VERSION, latestVersion);

@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  base: "/SBAGIAMU/",
+  base: process.env.GITHUB_PAGES ? "/SBAGIAMU/" : "/",
   plugins: [react()],
   resolve: {
     alias: {
@@ -21,8 +21,8 @@ export default defineConfig({
     rollupOptions: {
       onwarn(warning, warn) {
         // Suppress sourcemap warnings dari UI components
-        if (warning.code === 'SOURCEMAP_ERROR' || 
-            (warning.message && warning.message.includes('sourcemap'))) {
+        if (warning.code === 'SOURCEMAP_ERROR' ||
+          (warning.message && warning.message.includes('sourcemap'))) {
           return;
         }
         warn(warning);
