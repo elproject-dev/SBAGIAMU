@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useListOutlets, useListStaff, useListPointsSettings, useSavePointsSettings, useDeletePointsSettings } from "@/mocks/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { formatRupiah } from "@/lib/formatters";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function PointsSettingsPage() {
   const { toast } = useToast();
@@ -39,7 +40,7 @@ export default function PointsSettingsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPointDetail, setSelectedPointDetail] = useState<any>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formOutlet, setFormOutlet] = useState("all");
+  const [formOutlets, setFormOutlets] = useState<string[]>(["all"]);
   const [formStaff, setFormStaff] = useState("all");
   const [enablePoints, setEnablePoints] = useState(true);
   const [pointsValue, setPointsValue] = useState("1000");
@@ -58,16 +59,20 @@ export default function PointsSettingsPage() {
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-  const { data: formStaffList } = useListStaff({ outletId: formOutlet });
+  const { data: formStaffList } = useListStaff({ outletId: formOutlets.length === 1 ? formOutlets[0] : "all" });
 
   useEffect(() => {
-    if (formOutlet !== "all" && formStaff !== "all" && formStaffList && formStaffList.length > 0) {
+    if (formOutlets.length === 1 && formOutlets[0] !== "all" && formStaff !== "all" && formStaffList && formStaffList.length > 0) {
       const staffExistsInOutlet = formStaffList.some((s: any) => s.email === formStaff);
       if (!staffExistsInOutlet) {
         setFormStaff("all");
       }
+    } else if (formOutlets.length !== 1 || formOutlets.includes("all")) {
+      if (formStaff !== "all") {
+        setFormStaff("all");
+      }
     }
-  }, [formOutlet, formStaffList]);
+  }, [formOutlets, formStaffList, formStaff]);
 
   // Supabase Hooks
   const { data: savedConfigsData, isLoading: isLoadingConfigs, refetch: refetchConfigs } = useListPointsSettings();
@@ -104,7 +109,7 @@ export default function PointsSettingsPage() {
 
   const handleEditConfig = (config: any) => {
     setEditingId(config.id);
-    setFormOutlet(config.outletId ? config.outletId.toString() : "all");
+    setFormOutlets([config.outletId ? config.outletId.toString() : "all"]);
     setFormStaff(config.staffEmail ? config.staffEmail : "all");
     setEnablePoints(config.enablePoints);
     setPointsValue(config.pointsValue);
@@ -117,7 +122,7 @@ export default function PointsSettingsPage() {
 
   const handleAddConfig = () => {
     setEditingId(null);
-    setFormOutlet("all");
+    setFormOutlets(["all"]);
     setFormStaff("all");
     setEnablePoints(true);
     setPointsValue("1000");
@@ -134,9 +139,17 @@ export default function PointsSettingsPage() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
 
-  const handleSave = () => {
-    const payload = {
-      outletId: formOutlet,
+  const handleSave = async () => {
+    if (formOutlets.length === 0) {
+      toast({
+        title: "Peringatan",
+        description: "Pilih minimal satu outlet target",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const payloadTemplate = {
       staffEmail: formStaff,
       enablePoints,
       pointsValue,
@@ -146,26 +159,33 @@ export default function PointsSettingsPage() {
       maxPointsPerTransaction
     };
 
-    saveSettings(payload, {
-      onSuccess: () => {
-        toast({
-          title: "Sukses",
-          description: `Pengaturan poin berhasil disimpan`,
+    try {
+      const promises = formOutlets.map(outletId => {
+        return new Promise((resolve, reject) => {
+          saveSettings({ ...payloadTemplate, outletId }, {
+            onSuccess: resolve,
+            onError: reject
+          });
         });
+      });
 
-        // Dispatch global event for instant reactivity
-        window.dispatchEvent(new Event('pointsSettingsChanged'));
-        refetchConfigs();
-        setIsDialogOpen(false);
-      },
-      onError: (err: any) => {
-        toast({
-          title: "Error",
-          description: "Gagal menyimpan pengaturan poin",
-          variant: "destructive"
-        });
-      }
-    });
+      await Promise.all(promises);
+
+      toast({
+        title: "Sukses",
+        description: "Pengaturan poin berhasil disimpan",
+      });
+
+      window.dispatchEvent(new Event('pointsSettingsChanged'));
+      refetchConfigs();
+      setIsDialogOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan pengaturan poin",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -369,21 +389,43 @@ export default function PointsSettingsPage() {
 
           <div className="space-y-4 py-4">
             {/* Target Setup */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">Outlet Target</label>
-              <Select value={formOutlet} onValueChange={setFormOutlet}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih outlet" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Outlet</SelectItem>
-                  {outlets?.map((outlet: any) => (
-                    <SelectItem key={outlet.id} value={outlet.id.toString()}>
-                      {outlet.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto p-3 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="outlet-all" 
+                    checked={formOutlets.includes("all")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormOutlets(["all"]);
+                      } else {
+                        setFormOutlets([]);
+                      }
+                    }}
+                  />
+                  <label htmlFor="outlet-all" className="text-sm font-medium cursor-pointer">Semua Outlet</label>
+                </div>
+                {outlets?.map((outlet: any) => (
+                  <div key={outlet.id} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`outlet-${outlet.id}`} 
+                      checked={formOutlets.includes(outlet.id.toString())}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormOutlets(prev => {
+                            const newOutlets = prev.filter(id => id !== "all");
+                            return [...newOutlets, outlet.id.toString()];
+                          });
+                        } else {
+                          setFormOutlets(prev => prev.filter(id => id !== outlet.id.toString()));
+                        }
+                      }}
+                    />
+                    <label htmlFor={`outlet-${outlet.id}`} className="text-sm cursor-pointer">{outlet.name}</label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

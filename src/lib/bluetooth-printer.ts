@@ -295,6 +295,11 @@ export function formatReceipt(transaction: any): string {
   receipt += formatLine('No.ID', id ? formatInvoiceNumber(id) : '-', PAPER_WIDTH) + '\n';
   receipt += formatLine('Waktu', waktuStr, PAPER_WIDTH) + '\n';
 
+  if (transaction.orderType && transaction.orderType !== 'belum_dipilih') {
+    const orderTypeLabel = transaction.orderType === 'dine_in' ? 'Dine In' : transaction.orderType === 'take_away' ? 'Take Away' : transaction.orderType;
+    receipt += formatLine('Pesanan', orderTypeLabel, PAPER_WIDTH) + '\n';
+  }
+
   if (customerType === 'member' && customerName) {
     receipt += formatLine('Pelanggan', `Member - ${customerName}`, PAPER_WIDTH) + '\n';
   } else {
@@ -776,6 +781,7 @@ export interface ReceiptData {
   cashierName?: string;
   cashier_name?: string;
   customerType?: 'member' | 'regular'; // member atau regular
+  orderType?: string;
 
   // Items
   items: ReceiptItem[];

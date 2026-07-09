@@ -1605,6 +1605,7 @@ export const useCreateTransaction = () => {
           ...basePayload,
           discount_note: params.data.discountNote?.trim() || null,
           customer_type: customerType,
+          order_type: params.data.orderType || 'belum_dipilih',
         };
 
         let { data, error } = await supabase
@@ -1618,10 +1619,11 @@ export const useCreateTransaction = () => {
           (error.code === 'PGRST204' ||
             error.message?.includes('discount_note') ||
             error.message?.includes('customer_type') ||
+            error.message?.includes('order_type') ||
             error.message?.includes('outlet_id'))
         ) {
-          // Try without outlet_id if it's not supported yet
-          const { outlet_id, ...payloadWithoutOutlet } = extendedPayload;
+          // Try without newer fields if they are not supported yet
+          const { outlet_id, order_type, ...payloadWithoutOutlet } = extendedPayload as any;
           ({ data, error } = await supabase
             .from('transactions')
             .insert(withTenantOwner(payloadWithoutOutlet))

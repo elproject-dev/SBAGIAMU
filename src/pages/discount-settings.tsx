@@ -63,7 +63,7 @@ export default function DiscountSettingsPage() {
   // Form State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formOutlet, setFormOutlet] = useState("all");
+  const [formOutlets, setFormOutlets] = useState<string[]>(["all"]);
   const [formStaff, setFormStaff] = useState("all");
   const [enableDiscount, setEnableDiscount] = useState(true);
   const [defaultDiscountPrice, setDefaultDiscountPrice] = useState("0");
@@ -71,16 +71,20 @@ export default function DiscountSettingsPage() {
   const [ppnPercentage, setPpnPercentage] = useState("11");
   const [allowedPromos, setAllowedPromos] = useState<string[]>([]);
 
-  const { data: formStaffList } = useListStaff({ outletId: formOutlet });
+  const { data: formStaffList } = useListStaff({ outletId: formOutlets.length === 1 ? formOutlets[0] : "all" });
 
   useEffect(() => {
-    if (formOutlet !== "all" && formStaff !== "all" && formStaffList && formStaffList.length > 0) {
+    if (formOutlets.length === 1 && formOutlets[0] !== "all" && formStaff !== "all" && formStaffList && formStaffList.length > 0) {
       const staffExistsInOutlet = formStaffList.some((s: any) => s.email === formStaff);
       if (!staffExistsInOutlet) {
         setFormStaff("all");
       }
+    } else if (formOutlets.length !== 1 || formOutlets.includes("all")) {
+      if (formStaff !== "all") {
+        setFormStaff("all");
+      }
     }
-  }, [formOutlet, formStaffList]);
+  }, [formOutlets, formStaffList, formStaff]);
 
   const savedConfigs = [...(savedConfigsData || [])];
 
@@ -106,7 +110,7 @@ export default function DiscountSettingsPage() {
 
   const handleEditConfig = (config: any) => {
     setEditingId(config.id === 'default_global' ? 'default_global' : config.id.toString());
-    setFormOutlet(config.outletId);
+    setFormOutlets([config.outletId ? config.outletId.toString() : "all"]);
     setFormStaff(config.staffEmail);
     setEnableDiscount(config.enableDiscount);
     setDefaultDiscountPrice(config.defaultDiscountPrice?.toString() || "0");
@@ -118,7 +122,7 @@ export default function DiscountSettingsPage() {
 
   const handleAddConfig = () => {
     setEditingId(null);
-    setFormOutlet(outlets && outlets.length > 0 ? outlets[0].id.toString() : "");
+    setFormOutlets(["all"]);
     setFormStaff("all");
     setEnableDiscount(true);
     setDefaultDiscountPrice("0");
@@ -154,25 +158,43 @@ export default function DiscountSettingsPage() {
     });
   };
 
-  const handleSave = () => {
-    saveConfig({
-      outletId: formOutlet,
+  const handleSave = async () => {
+    if (formOutlets.length === 0) {
+      toast({
+        title: "Peringatan",
+        description: "Pilih minimal satu outlet target",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const payloadTemplate = {
       staffEmail: formStaff,
       enableDiscount,
       defaultDiscountPrice,
       enablePPN,
       ppnPercentage,
       allowedPromos
-    }, {
-      onSuccess: () => {
-        toast({ title: "Sukses", description: "Pengaturan berhasil disimpan" });
-        setIsDialogOpen(false);
-        refetchConfigs();
-      },
-      onError: () => {
-        toast({ title: "Error", description: "Gagal menyimpan pengaturan", variant: "destructive" });
-      }
-    });
+    };
+
+    try {
+      const promises = formOutlets.map(outletId => {
+        return new Promise((resolve, reject) => {
+          saveConfig({ ...payloadTemplate, outletId }, {
+            onSuccess: resolve,
+            onError: reject
+          });
+        });
+      });
+
+      await Promise.all(promises);
+
+      toast({ title: "Sukses", description: "Pengaturan berhasil disimpan" });
+      setIsDialogOpen(false);
+      refetchConfigs();
+    } catch (err: any) {
+      toast({ title: "Error", description: "Gagal menyimpan pengaturan", variant: "destructive" });
+    }
   };
 
   const formatRupiah = (val: string | number) => {
@@ -434,20 +456,45 @@ export default function DiscountSettingsPage() {
 
           <div className="space-y-4 py-4">
             {/* Target Setup */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">Outlet Target</label>
-              <Select value={formOutlet} onValueChange={setFormOutlet} disabled={editingId === 'default_global'}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih outlet" />
-                </SelectTrigger>
-                <SelectContent>
-                  {outlets?.map((outlet: any) => (
-                    <SelectItem key={outlet.id} value={outlet.id.toString()}>
-                      {outlet.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto p-3 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="outlet-all" 
+                    checked={formOutlets.includes("all")}
+                    disabled={editingId === 'default_global'}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormOutlets(["all"]);
+                      } else {
+                        setFormOutlets([]);
+                      }
+                    }}
+                  />
+                  <label htmlFor="outlet-all" className="text-sm font-medium cursor-pointer">Semua Outlet</label>
+                </div>
+                {outlets?.map((outlet: any) => (
+                  <div key={outlet.id} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`outlet-${outlet.id}`} 
+                      checked={formOutlets.includes(outlet.id.toString())}
+                      disabled={editingId === 'default_global'}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormOutlets(prev => {
+                            const newOutlets = prev.filter(id => id !== "all");
+                            return [...newOutlets, outlet.id.toString()];
+                          });
+                        } else {
+                          setFormOutlets(prev => prev.filter(id => id !== outlet.id.toString()));
+                        }
+                      }}
+                    />
+                    <label htmlFor={`outlet-${outlet.id}`} className="text-sm cursor-pointer">{outlet.name}</label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

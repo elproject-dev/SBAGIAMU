@@ -52,7 +52,7 @@ const getPointsSettingsForUser = (user: any) => {
 };
 
 export default function TransactionDetailPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -67,7 +67,7 @@ export default function TransactionDetailPage() {
 
   // Check if user is admin (only sbagiamu.pos@gmail.com)
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-  
+
   const { data: trx, isLoading } = useGetTransaction(id);
   const deleteTransaction = useDeleteTransaction();
   const [isPrinting, setIsPrinting] = useState(false);
@@ -150,7 +150,7 @@ export default function TransactionDetailPage() {
 
       await new Promise(resolve => setTimeout(resolve, 500));
       console.log('Printing receipt...', printData);
-      
+
       const printed = await printReceipt(printData);
       if (!printed) {
         console.error('Print failed');
@@ -287,7 +287,7 @@ export default function TransactionDetailPage() {
             )}
           </div>
         </div>
-        
+
         {/* Receipt Card */}
         <div className="p-4 sm:p-6 flex-1 overflow-auto flex justify-center">
           <Card className="w-full max-w-lg shadow-lg border-slate-200 my-2 sm:my-4 h-max printable-receipt">
@@ -333,9 +333,15 @@ export default function TransactionDetailPage() {
                   <span className="font-medium text-right">{trx.customers?.name || "Umum"}</span>
                 </div>
                 <div className="flex justify-between text-xs sm:text-sm">
-                  <span className="text-slate-500">Metode</span>
+                  <span className="text-slate-500">Metode Pembayaran</span>
                   <span className="font-medium">{getPaymentLabel(trx.payment_method)}</span>
                 </div>
+                {trx.order_type && trx.order_type !== 'belum_dipilih' && (
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-slate-500">Type Pesanan</span>
+                    <span className="font-medium">{trx.order_type === 'dine_in' ? 'Dine In' : trx.order_type === 'take_away' ? 'Take Away' : trx.order_type}</span>
+                  </div>
+                )}
               </div>
 
               {/* Items */}

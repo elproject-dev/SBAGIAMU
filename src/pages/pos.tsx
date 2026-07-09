@@ -106,6 +106,7 @@ export default function POSPage() {
   const [manualCustomerName, setManualCustomerName] = useState<string>("");
   const [manualCustomerPhone, setManualCustomerPhone] = useState<string>("");
   const [customerType, setCustomerType] = useState<string>("umum");
+  const [orderType, setOrderType] = useState<string>("belum_dipilih");
   const [pointsToRedeem, setPointsToRedeem] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [amountPaidDisplay, setAmountPaidDisplay] = useState<string>("");
@@ -542,6 +543,7 @@ export default function POSPage() {
       setIsCustomDiscountNote(false);
       setAmountPaidDisplay("");
       setAmountPaidStr("");
+      setOrderType("belum_dipilih");
     }
   };
 
@@ -686,6 +688,7 @@ export default function POSPage() {
         customerName: receiptCustomerName !== "Umum" ? receiptCustomerName : undefined,
         customerPhone: selectedCustomer?.phone || manualCustomerPhone || undefined,
         customerType: normalizedCustomerType,
+        orderType: orderType,
         pointsRedeemed: pointsRedeemed,
         pointsDiscount: pointsDiscount,
         earnedPoints: isMemberTransaction ? earnedPoints : 0,
@@ -722,6 +725,7 @@ export default function POSPage() {
           customerName: receiptCustomerName,
           customerPhone: selectedCustomer?.phone || manualCustomerPhone,
           customerType: isMemberTransaction ? "member" : customerType,
+          orderType: orderType,
           pointsRedeemed: pointsRedeemed,
           pointsDiscount: pointsDiscount,
           earnedPoints: isMemberTransaction ? earnedPoints : 0,
@@ -750,6 +754,7 @@ export default function POSPage() {
             customerName: receiptCustomerName,
             customerPhone: selectedCustomer?.phone || manualCustomerPhone,
             customerType: isMemberTransaction ? "member" : customerType,
+            orderType: orderType,
             pointsRedeemed: pointsRedeemed,
             pointsDiscount: pointsDiscount,
             earnedPoints: isMemberTransaction ? earnedPoints : 0,
@@ -764,6 +769,7 @@ export default function POSPage() {
         setManualCustomerName("");
         setManualCustomerPhone("");
         setCustomerType("umum");
+        setOrderType("belum_dipilih");
         setPointsToRedeem("");
         setPaymentMethod("cash");
         setAmountPaidDisplay("");
@@ -1262,6 +1268,23 @@ export default function POSPage() {
               </div>
             )}
 
+            {/* Order Type */}
+            <div className="px-4 lg:px-3 pb-4 lg:pb-3">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipe Pesanan</label>
+                <Select value={orderType} onValueChange={setOrderType}>
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Pilih tipe pesanan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="belum_dipilih">Belum Dipilih</SelectItem>
+                    <SelectItem value="dine_in">Dine In</SelectItem>
+                    <SelectItem value="take_away">Take Away</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Payment Method */}
             <div className="px-4 lg:px-3 pb-4 lg:pb-3">
               <div className="flex flex-col gap-2">
@@ -1433,7 +1456,7 @@ export default function POSPage() {
               <Button
                 className="w-full h-12 text-base font-medium shadow-lg"
                 size="lg"
-                disabled={cart.length === 0 || createTransaction.isPending || (paymentMethod === "cash" && amountPaid < total)}
+                disabled={cart.length === 0 || createTransaction.isPending || (paymentMethod === "cash" && amountPaid < total) || orderType === "belum_dipilih"}
                 onClick={handleCheckout}
               >
                 {createTransaction.isPending ? (
@@ -1523,9 +1546,15 @@ export default function POSPage() {
 
               <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2 mt-2 space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Metode</span>
+                  <span className="text-slate-600 dark:text-slate-400">Metode Pembayaran</span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">{getPaymentMethodLabel(lastTransaction?.paymentMethod || '')}</span>
                 </div>
+                {lastTransaction?.orderType && lastTransaction.orderType !== 'belum_dipilih' && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400">Type Pesanan</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">{lastTransaction.orderType === 'dine_in' ? 'Dine In' : lastTransaction.orderType === 'take_away' ? 'Take Away' : lastTransaction.orderType}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500 dark:text-slate-400">Subtotal</span>
                   <span className="text-slate-700 dark:text-slate-300">{formatRupiah(lastTransaction?.subtotal || 0)}</span>

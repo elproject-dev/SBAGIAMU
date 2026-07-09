@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
-import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, LogIn, Eye, EyeOff, Smartphone, Monitor, Download, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDefaultRoute } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
@@ -16,6 +17,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDownloads, setShowDownloads] = useState(false);
+  const [androidUrl, setAndroidUrl] = useState<string | null>(null);
+  const [desktopUrl, setDesktopUrl] = useState<string | null>(null);
 
   // Get custom primary color from localStorage
   const [primaryHue, setPrimaryHue] = useState(() => parseInt(localStorage.getItem('primaryHue') || '35'));
@@ -32,6 +36,36 @@ export default function LoginPage() {
     syncColor();
     window.addEventListener('storeSettingsChanged', syncColor);
     return () => window.removeEventListener('storeSettingsChanged', syncColor);
+  }, []);
+
+  // Fetch download URLs
+  useEffect(() => {
+    const fetchDownloadUrls = async () => {
+      try {
+        // Android is dynamic now, need to list files
+        const { data: androidFiles } = await supabase.storage.from('app-releases').list('android');
+        if (androidFiles && androidFiles.length > 0) {
+          const apkFile = androidFiles.find(f => f.name.endsWith('.apk'));
+          if (apkFile) {
+            const { data: androidData } = supabase.storage.from('app-releases').getPublicUrl(`android/${apkFile.name}`);
+            setAndroidUrl(androidData.publicUrl);
+          }
+        }
+
+        // Desktop is dynamic, need to list files
+        const { data: files } = await supabase.storage.from('app-releases').list('desktop');
+        if (files && files.length > 0) {
+          const exeFile = files.find(f => f.name.endsWith('.exe'));
+          if (exeFile) {
+            const { data: desktopData } = supabase.storage.from('app-releases').getPublicUrl(`desktop/${exeFile.name}`);
+            setDesktopUrl(desktopData.publicUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Gagal mengambil link download:", error);
+      }
+    };
+    fetchDownloadUrls();
   }, []);
 
   const primaryColor = `hsl(${primaryHue}, ${primarySaturation}%, ${primaryLightness}%)`;
@@ -90,9 +124,9 @@ export default function LoginPage() {
         <div className="relative group">
           {/* Subtle glow behind card */}
           <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/0 rounded-[2rem] blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-          
-          <div className="relative bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-8 sm:p-10">
-            <form onSubmit={handleSubmit} className="space-y-6">
+
+          <div className="relative bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-8 sm:p-10 flex flex-col items-center">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full">
               <div className="space-y-2.5">
                 <label className="text-sm font-semibold text-white/90 ml-1">Email</label>
                 <div className="relative group/input">
@@ -149,13 +183,71 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-white/70 text-sm">
+            <div className="mt-6 text-center w-full">
+              <p className="text-white/70 text-sm mb-6">
                 Belum punya akun?{" "}
                 <Link href="/register" className="text-white font-semibold hover:underline hover:text-white/90 transition-colors cursor-pointer">
                   Daftar sekarang
                 </Link>
               </p>
+
+              <button
+                type="button"
+                onClick={() => setShowDownloads(!showDownloads)}
+                className="relative flex flex-col items-center justify-center pt-2 w-full group/toggle cursor-pointer"
+              >
+                <div className="w-full flex items-center">
+                  <div className="flex-grow border-t border-white/20 group-hover/toggle:border-white/40 transition-colors"></div>
+                  <div className="mx-4 text-white/50 group-hover/toggle:text-white/80 transition-colors">
+                    <span className="text-xs font-medium uppercase tracking-wider">Download Aplikasi</span>
+                  </div>
+                  <div className="flex-grow border-t border-white/20 group-hover/toggle:border-white/40 transition-colors"></div>
+                </div>
+                {!showDownloads && (
+                  <div className="mt-2 animate-bounce">
+                    <ChevronDown className="w-4 h-4 text-white/40 group-hover/toggle:text-white/60 transition-colors" />
+                  </div>
+                )}
+              </button>
+
+              <div
+                className={`grid transition-all duration-300 ease-in-out w-full ${showDownloads ? "grid-rows-[1fr] opacity-100 mt-2 mb-4" : "grid-rows-[0fr] opacity-0 mt-0 mb-0"
+                  }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="grid grid-cols-2 gap-3 w-full pb-2">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white rounded-xl h-12 transition-all duration-300 flex items-center justify-center gap-2 group"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (androidUrl) window.open(androidUrl, '_blank');
+                      }}
+                      disabled={!androidUrl}
+                    >
+                      <Smartphone className="w-4 h-4 text-white/70 group-hover:text-white group-hover:-translate-y-0.5 transition-all" />
+                      <span className="font-semibold text-sm">Android</span>
+                      <Download className="w-3 h-3 opacity-50" />
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white rounded-xl h-12 transition-all duration-300 flex items-center justify-center gap-2 group"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (desktopUrl) window.open(desktopUrl, '_blank');
+                      }}
+                      disabled={!desktopUrl}
+                    >
+                      <Monitor className="w-4 h-4 text-white/70 group-hover:text-white group-hover:-translate-y-0.5 transition-all" />
+                      <span className="font-semibold text-sm">Desktop</span>
+                      <Download className="w-3 h-3 opacity-50" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

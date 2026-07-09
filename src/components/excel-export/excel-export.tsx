@@ -43,6 +43,7 @@ interface Transaction {
   outletId?: number;
   pointsDiscount?: number;
   tax?: number;
+  orderType?: string;
 }
 
 interface ExportColumn {
@@ -75,6 +76,7 @@ const DEFAULT_COL_WIDTHS: ExportColumn[] = [
   { header: "Tukar Poin", key: "Tukar Poin", width: 10 },
   { header: "Grand Total", key: "Grand Total", width: 14 },
   { header: "Metode", key: "Metode", width: 14 },
+  { header: "Type Pesanan", key: "Type Pesanan", width: 14 },
   { header: "Kasir", key: "Kasir", width: 14 },
   { header: "Outlet", key: "Outlet", width: 16 },
 ];
@@ -88,6 +90,7 @@ const CENTER_ALIGNED_KEYS = new Set([
   "No",
   "Poin",
   "Bergabung Sejak",
+  "Type Pesanan",
 ]);
 
 const RIGHT_ALIGNED_KEYS = new Set([
@@ -402,6 +405,7 @@ function buildExportRow(
     "Tukar Poin": formatExcelRupiah(trx.pointsDiscount),
     "Grand Total": formatExcelRupiah(trx.total),
     Metode: formatPaymentMethod(trx.paymentMethod),
+    "Type Pesanan": trx.orderType === 'dine_in' ? 'Dine In' : trx.orderType === 'take_away' ? 'Take Away' : (trx.orderType !== 'belum_dipilih' && trx.orderType ? trx.orderType : '-'),
     Kasir: trx.cashierName || cashierDefault,
     Outlet: outletName || branchName,
   };
@@ -526,6 +530,7 @@ export function mapApiTransactionsToExport(
       customerName: customer?.name || (trx.customerName as string | undefined) || "Umum",
       membershipStatus: formatMembershipStatus(customerType, customer?.membership_type),
       paymentMethod: String(trx.payment_method ?? trx.paymentMethod ?? ""),
+      orderType: String(trx.order_type ?? trx.orderType ?? ""),
       items: rawItems.map((item) => ({
         productName: String(item.product_name ?? item.productName ?? "-"),
         price: Number(item.price) || 0,
@@ -932,8 +937,11 @@ export function DownloadExcelDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm mx-auto max-h-[90vh] overflow-y-auto scrollbar-slim">
-        <DialogHeader>
-          <DialogTitle className="hidden">Download Laporan</DialogTitle>
+        <DialogHeader className="mb-4 space-y-2">
+          <div className="mx-auto w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-full mb-2">
+            <FileDown className="w-6 h-6" />
+          </div>
+          <DialogTitle className="text-center text-lg sm:text-xl text-slate-900 dark:text-white">Download Laporan Excel</DialogTitle>
           <DialogDescription className="hidden">Download laporan Excel</DialogDescription>
         </DialogHeader>
 

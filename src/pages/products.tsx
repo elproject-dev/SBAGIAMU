@@ -6,7 +6,7 @@ import { uploadProductImage, deleteProductImage, deleteProductImageByName, getPr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Package, FolderPlus, Upload, X, Image as ImageIcon, Store, Tag, AlertTriangle, Filter, ArrowUpDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package, FolderPlus, Upload, X, Image as ImageIcon, Store, Tag, AlertTriangle, Filter, ArrowUpDown, ChevronDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -606,7 +606,7 @@ export default function ProductsPage() {
                       </div>
 
                       <div className="flex-1 flex flex-col gap-1">
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start justify-between gap-2 h-full">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-slate-900 dark:text-white text-sm line-clamp-2">{product.name}</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{categoryName}</p>
@@ -618,13 +618,55 @@ export default function ProductsPage() {
                               </div>
                             )}
                           </div>
-                          {product.isActive ? (
-                            <Badge className="bg-green-500 dark:bg-green-600 whitespace-nowrap text-xs">Aktif</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap text-xs">Nonaktif</Badge>
-                          )}
+                          
+                          <div className="flex flex-col items-end gap-2 h-full">
+                            {product.isActive ? (
+                              <Badge className="bg-green-500 dark:bg-green-600 whitespace-nowrap text-xs">Aktif</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap text-xs">Nonaktif</Badge>
+                            )}
+                            
+                            <div className="mt-auto">
+                              {isAdmin ? (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-7 text-xs px-3 rounded-full border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                      <span>Lihat Harga</span>
+                                      <ChevronDown className="w-3 h-3 opacity-50" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-64 p-0 rounded-xl shadow-xl overflow-hidden border-slate-200 dark:border-slate-800" align="end" onClick={(e) => e.stopPropagation()}>
+                                    <div className="bg-slate-50 dark:bg-slate-900/80 p-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5">
+                                      <div>
+                                        <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Daftar Harga</p>
+                                        <p className="text-[11px] text-slate-500 mt-1">Rincian per outlet</p>
+                                      </div>
+                                    </div>
+                                    <div className="max-h-48 overflow-y-auto p-1.5 custom-scrollbar space-y-0.5">
+                                      {outlets?.filter((o: any) => product.allowed_outlets?.includes("all") || product.allowed_outlets?.includes(o.id.toString())).map((outlet: any) => {
+                                        const price = (product.outlet_prices && product.outlet_prices[outlet.id.toString()]) || product.price || 0;
+                                        return (
+                                          <div key={outlet.id} className="flex justify-between items-center text-sm p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-default group">
+                                            <span className="text-slate-600 dark:text-slate-300 truncate max-w-[130px] font-medium group-hover:text-primary transition-colors" title={outlet.name}>{outlet.name}</span>
+                                            <span className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{formatRupiah(price)}</span>
+                                          </div>
+                                        );
+                                      })}
+                                      {(!outlets || outlets.length === 0) && (
+                                        <div className="flex justify-between items-center text-sm p-2">
+                                          <span className="text-slate-500">Harga Dasar</span>
+                                          <span className="font-bold text-slate-900 dark:text-white">{formatRupiah(product.price || 0)}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              ) : (
+                                <span className="font-bold text-primary text-sm">{formatRupiah(product.price)}</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="font-bold text-primary text-sm mt-auto">{formatRupiah(product.price)}</div>
                       </div>
                     </div>
 
@@ -654,7 +696,7 @@ export default function ProductsPage() {
                   <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                     <TableHead className="w-16 text-center">Foto</TableHead>
                     <TableHead>Nama</TableHead>
-                    <TableHead className="text-right whitespace-nowrap">Harga</TableHead>
+                    <TableHead className="text-center whitespace-nowrap">Harga</TableHead>
                     <TableHead className="text-center whitespace-nowrap">Kategori</TableHead>
                     {isAdmin && <TableHead className="text-right whitespace-nowrap">Outlet</TableHead>}
                     <TableHead className="text-center whitespace-nowrap">Status</TableHead>
@@ -683,7 +725,45 @@ export default function ProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="font-medium text-slate-900 dark:text-white">{product.name}</TableCell>
-                          <TableCell className="text-right font-bold text-primary whitespace-nowrap">{formatRupiah(product.price)}</TableCell>
+                          <TableCell className="text-center whitespace-nowrap">
+                            {isAdmin ? (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" size="sm" className="h-8 text-xs px-3 rounded-full border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-1.5 mx-auto" onClick={(e) => e.stopPropagation()}>
+                                    <span>Lihat Harga</span>
+                                    <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-64 p-0 rounded-xl shadow-xl overflow-hidden border-slate-200 dark:border-slate-800" align="end" onClick={(e) => e.stopPropagation()}>
+                                  <div className="bg-slate-50 dark:bg-slate-900/80 p-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5">
+                                    <div>
+                                      <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Daftar Harga</p>
+                                      <p className="text-[11px] text-slate-500 mt-1">Rincian per outlet</p>
+                                    </div>
+                                  </div>
+                                  <div className="max-h-48 overflow-y-auto p-1.5 custom-scrollbar space-y-0.5">
+                                    {outlets?.filter((o: any) => product.allowed_outlets?.includes("all") || product.allowed_outlets?.includes(o.id.toString())).map((outlet: any) => {
+                                      const price = (product.outlet_prices && product.outlet_prices[outlet.id.toString()]) || product.price || 0;
+                                      return (
+                                        <div key={outlet.id} className="flex justify-between items-center text-sm p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-default group">
+                                          <span className="text-slate-600 dark:text-slate-300 truncate max-w-[130px] font-medium group-hover:text-primary transition-colors" title={outlet.name}>{outlet.name}</span>
+                                          <span className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{formatRupiah(price)}</span>
+                                        </div>
+                                      );
+                                    })}
+                                    {(!outlets || outlets.length === 0) && (
+                                      <div className="flex justify-between items-center text-sm p-2">
+                                        <span className="text-slate-500">Harga Dasar</span>
+                                        <span className="font-bold text-slate-900 dark:text-white">{formatRupiah(product.price || 0)}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            ) : (
+                              <span className="font-bold text-primary">{formatRupiah(product.price)}</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-center whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">{categoryName}</TableCell>
                           {isAdmin && (
                             <TableCell className="text-right whitespace-nowrap">

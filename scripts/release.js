@@ -28,11 +28,11 @@ async function runRelease() {
     const versionFilePath = path.resolve(__dirname, '../src/lib/version.ts');
     const versionFileContent = fs.readFileSync(versionFilePath, 'utf-8');
     const versionMatch = versionFileContent.match(/export const APP_VERSION = '(.+?)';/);
-    
+
     if (!versionMatch || !versionMatch[1]) {
       throw new Error('Tidak bisa menemukan APP_VERSION di src/lib/version.ts');
     }
-    
+
     const version = versionMatch[1];
     console.log(`📦 Versi terdeteksi: v${version}`);
 
@@ -40,7 +40,7 @@ async function runRelease() {
     console.log('📝 Memperbarui versi di android/app/build.gradle...');
     const buildGradlePath = path.resolve(__dirname, '../android/app/build.gradle');
     let buildGradleContent = fs.readFileSync(buildGradlePath, 'utf-8');
-    
+
     // Cari versionCode saat ini dan naikkan 1
     const versionCodeMatch = buildGradleContent.match(/versionCode\s+(\d+)/);
     if (versionCodeMatch && versionCodeMatch[1]) {
@@ -69,11 +69,26 @@ async function runRelease() {
       throw new Error(`APK tidak ditemukan di ${apkPath}.\nPastikan build berhasil.`);
     }
 
-    // 6. Upload APK ke Supabase Storage
-    const fileName = `app-release.apk`;
+    // 6. Bersihkan file lama di folder android
+    const fileName = `Sbagiamu_v.${version}.apk`;
     const storagePath = `android/${fileName}`;
+
+    console.log(`🗑️ Membersihkan APK versi lama di Supabase...`);
+    const { data: existingFiles } = await supabase.storage.from('app-releases').list('android');
+    if (existingFiles && existingFiles.length > 0) {
+      const filesToDelete = existingFiles
+        .filter(f => f.name !== fileName && f.name !== '.emptyFolderPlaceholder')
+        .map(f => `android/${f.name}`);
+
+      if (filesToDelete.length > 0) {
+        await supabase.storage.from('app-releases').remove(filesToDelete);
+        console.log(`✅ Berhasil menghapus ${filesToDelete.length} file versi lama.`);
+      }
+    }
+
+    // 7. Upload APK Baru ke Supabase Storage
     console.log(`☁️ Mengupload ${fileName} ke Supabase Storage (app-releases/android)...`);
-    
+
     const apkBuffer = fs.readFileSync(apkPath);
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('app-releases')
@@ -93,7 +108,7 @@ async function runRelease() {
 
     // 4. Update Database app_config
     console.log('\n🔄 Memperbarui versi di Database app_config...');
-    
+
     // Update app_version_latest
     const { error: dbError1 } = await supabase
       .from('app_config')
