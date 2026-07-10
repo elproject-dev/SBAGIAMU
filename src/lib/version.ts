@@ -2,16 +2,15 @@
  * Versi aplikasi SBAGIAMU POS
  * Update nilai ini setiap kali rilis versi baru
  */
-export const APP_VERSION = '1.0.22';
+export const APP_VERSION = '1.0.24';
 
 /**
  * Catatan rilis untuk versi ini (Changelog)
  * Update daftar ini sebelum menjalankan "npm run release"
  */
 export const RELEASE_CHANGELOG = [
-  "Pembaruan Fitur CHecklist Diskon & Poin Per Outlet",
-  "Penambahan Fitur Dropdown Type Pesanan",
-  "Pembaruan Print,Table Excel,Riwayat transaksi."
+  "Penambahan Fitur Print Cetak Outlet",
+  "Add Splash Screen Loading"
 ];
 
 /**

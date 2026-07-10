@@ -30,6 +30,7 @@ import DiscountSettingsPage from "@/pages/discount-settings";
 import ExpensesPage from "@/pages/expenses";
 import StaffPage from "@/pages/staff";
 import PromoPage from "@/pages/promo";
+import { SplashScreen } from "@/components/SplashScreen";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -181,6 +182,24 @@ function AppRoutes() {
 function App() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isClosingSplash, setIsClosingSplash] = useState(false);
+
+  useEffect(() => {
+    // Start fade out animation after 2.2 seconds
+    const closeTimer = setTimeout(() => {
+      setIsClosingSplash(true);
+    }, 2200);
+
+    // Hide splash screen completely after 2.8 seconds
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2800);
+    return () => {
+      clearTimeout(closeTimer);
+      clearTimeout(splashTimer);
+    };
+  }, []);
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -235,6 +254,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          {showSplash && <SplashScreen isClosing={isClosingSplash} />}
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <AppRoutes />
           </WouterRouter>

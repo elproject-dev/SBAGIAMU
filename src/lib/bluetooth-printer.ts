@@ -123,7 +123,7 @@ export async function connectToPrinter(macAddress: string): Promise<{ success: b
         BT.list((devices: any[]) => resolve(devices || []), (e: any) => reject(e));
       });
 
-      const matchedDevice = devices.find((device: any) => 
+      const matchedDevice = devices.find((device: any) =>
         (device.address || device.id || '').toLowerCase() === macAddress.toLowerCase()
       );
 
@@ -187,9 +187,9 @@ async function printRaw(data: string): Promise<boolean> {
   if (isTauri()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('print_bluetooth_data', { 
-        address: printerDevice.macAddress, 
-        data: Array.from(bytes) 
+      await invoke('print_bluetooth_data', {
+        address: printerDevice.macAddress,
+        data: Array.from(bytes)
       });
       return true;
     } catch (error) {
@@ -294,6 +294,7 @@ export function formatReceipt(transaction: any): string {
 
   receipt += formatLine('No.ID', id ? formatInvoiceNumber(id) : '-', PAPER_WIDTH) + '\n';
   receipt += formatLine('Waktu', waktuStr, PAPER_WIDTH) + '\n';
+  receipt += formatLine('Outlet', transaction.outletName || 'Malioboro', PAPER_WIDTH) + '\n';
 
   if (transaction.orderType && transaction.orderType !== 'belum_dipilih') {
     const orderTypeLabel = transaction.orderType === 'dine_in' ? 'Dine In' : transaction.orderType === 'take_away' ? 'Take Away' : transaction.orderType;
@@ -325,13 +326,13 @@ export function formatReceipt(transaction: any): string {
     const PRICE_WIDTH = 9;
 
     const qtyPadded = qtyStr.padEnd(QTY_WIDTH, ' ');
-    
+
     let displayName = name;
     if (displayName.length > NAME_WIDTH) {
       displayName = displayName.substring(0, NAME_WIDTH - 3) + '...';
     }
     const namePadded = displayName.padEnd(NAME_WIDTH, ' ');
-    
+
     const pricePadded = priceStr.padStart(PRICE_WIDTH, ' ');
 
     const leftSide = `${qtyPadded}${namePadded} ${pricePadded}`;
@@ -385,7 +386,7 @@ export function formatReceipt(transaction: any): string {
 
   // Footer (Langsung tanpa newline)
   receipt += ESC_POS.ALIGN_CENTER;
-  
+
   if (footerMessage) {
     receipt += `${footerMessage}\n`;
   }
@@ -395,7 +396,7 @@ export function formatReceipt(transaction: any): string {
   if (footerMessage3) {
     receipt += `\n${footerMessage3}\n\n`; // Tambah spasi kosong 1 baris di bawahnya agar tidak terpotong
   }
-  
+
   receipt += ESC_POS.FEED_3_LINES;
 
   // Potong kertas
@@ -773,6 +774,7 @@ export interface ReceiptData {
   storeName?: string;
   storeAddress?: string;
   logoPath?: string; // Path ke logo gambar (PNG)
+  outletName?: string;
 
   // Transaction Info
   invoiceNumber: string;
@@ -878,6 +880,7 @@ export function generateReceiptRaw(data: ReceiptData): string {
   const dateObj = date ? (typeof date === 'string' ? new Date(date) : date) : new Date();
   const waktuStr = formatWaktuReceipt(dateObj);
   receipt += formatLine('Waktu', waktuStr, PAPER_WIDTH) + '\n';
+  receipt += formatLine('Outlet', data.outletName || 'Malioboro', PAPER_WIDTH) + '\n';
 
   receipt += formatLine('Pelanggan', customerName, PAPER_WIDTH) + '\n';
   receipt += formatLine('Kasir', displayCashierName, PAPER_WIDTH) + '\n';
@@ -897,13 +900,13 @@ export function generateReceiptRaw(data: ReceiptData): string {
     const PRICE_WIDTH = 9;
 
     const qtyPadded = qtyStr.padEnd(QTY_WIDTH, ' ');
-    
+
     let displayName = productName || '-';
     if (displayName.length > NAME_WIDTH) {
       displayName = displayName.substring(0, NAME_WIDTH - 3) + '...';
     }
     const namePadded = displayName.padEnd(NAME_WIDTH, ' ');
-    
+
     const pricePadded = priceStr.padStart(PRICE_WIDTH, ' ');
 
     const leftSide = `${qtyPadded}${namePadded} ${pricePadded}`;
@@ -961,7 +964,7 @@ export function generateReceiptRaw(data: ReceiptData): string {
   if (footerMessage3) {
     receipt += `\n${centerText(footerMessage3, PAPER_WIDTH)}\n\n`; // Tambah spasi kosong 1 baris di bawahnya agar tidak terpotong
   }
-  
+
   receipt += '\n';
   receipt += `${DECO_SEPARATOR}\n`;
   receipt += `\n\n`;
