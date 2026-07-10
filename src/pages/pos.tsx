@@ -1508,63 +1508,61 @@ export default function POSPage() {
                 })()}
               </div>
 
-              {/* Date/Time - Invoice Row */}
-              <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-2 mb-2">
-                <div className="text-left">
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                    {lastTransaction?.createdAt ? new Date(lastTransaction.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
-                    {lastTransaction?.createdAt ? new Date(lastTransaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium font-mono">
-                    {lastTransaction?.id ? formatInvoiceNumber(lastTransaction.id) : "INV-"}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">{cashierName}</p>
-                </div>
-              </div>
-
-              {/* Customer Info */}
-              {lastTransaction?.customerName && (
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-500 dark:text-slate-400">Pelanggan</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{lastTransaction.customerName}</span>
-                </div>
-              )}
-
-              {lastTransaction?.items?.map((item: any, idx: number) => (
-                <div key={idx} className="flex justify-between text-xs">
-                  <div className="flex-1">
-                    <p className="text-slate-900 dark:text-slate-100">{item.productName}</p>
-                    <p className="text-slate-400 dark:text-slate-500">{item.quantity} x {formatRupiah(item.price)}</p>
-                  </div>
-                  <p className="font-bold text-slate-900 dark:text-slate-100">{formatRupiah(item.quantity * item.price)}</p>
-                </div>
-              ))}
-
-              <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2 mt-2 space-y-1">
+              <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2 mb-2 space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Metode Pembayaran</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">{getPaymentMethodLabel(lastTransaction?.paymentMethod || '')}</span>
+                  <span className="text-slate-500 dark:text-slate-400">No.ID</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300 font-mono">
+                    {lastTransaction?.id ? formatInvoiceNumber(lastTransaction.id) : "INV-"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Waktu</span>
+                  <div className="text-right">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {lastTransaction?.createdAt ? new Date(lastTransaction.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })} ,
+                      {lastTransaction?.createdAt ? new Date(lastTransaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
                 </div>
                 {lastTransaction?.orderType && lastTransaction.orderType !== 'belum_dipilih' && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-600 dark:text-slate-400">Type Pesanan</span>
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{lastTransaction.orderType === 'dine_in' ? 'Dine In' : lastTransaction.orderType === 'take_away' ? 'Take Away' : lastTransaction.orderType}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Pesanan</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {lastTransaction.orderType === 'dine_in' ? 'Dine In' : lastTransaction.orderType === 'take_away' ? 'Take Away' : lastTransaction.orderType}
+                    </span>
                   </div>
                 )}
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Pelanggan</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {lastTransaction?.customerType === 'member' && lastTransaction?.customerName ? `Member - ${lastTransaction.customerName}` : 'Umum'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Kasir</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {lastTransaction?.cashier_name || lastTransaction?.cashierName || cashierName || 'Admin Kasir'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2 mb-2 space-y-1">
+                {lastTransaction?.items?.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-xs">
+                    <div className="flex-1">
+                      <p className="text-slate-900 dark:text-slate-100">{item.productName}</p>
+                      <p className="text-slate-400 dark:text-slate-500">{item.quantity} x {formatRupiah(item.price)}</p>
+                    </div>
+                    <p className="font-bold text-slate-900 dark:text-slate-100">{formatRupiah(item.quantity * item.price)}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2 space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500 dark:text-slate-400">Subtotal</span>
                   <span className="text-slate-700 dark:text-slate-300">{formatRupiah(lastTransaction?.subtotal || 0)}</span>
                 </div>
-                {(lastTransaction?.pointsDiscount || 0) > 0 && (
-                  <div className="flex justify-between text-xs text-amber-600 dark:text-amber-400">
-                    <span>Diskon Poin</span>
-                    <span>-{formatRupiah(lastTransaction?.pointsDiscount || 0)}</span>
-                  </div>
-                )}
                 {lastTransaction?.enablePPN && (
                   <div className="flex justify-between text-xs">
                     <span className="text-slate-500 dark:text-slate-400">Pajak ({lastTransaction?.ppnPercentage || 11}%)</span>
@@ -1577,14 +1575,21 @@ export default function POSPage() {
                     <span>-{formatRupiah(lastTransaction?.discount || 0)}</span>
                   </div>
                 )}
+                {(lastTransaction?.pointsDiscount || 0) > 0 && (
+                  <div className="flex justify-between text-xs text-amber-600 dark:text-amber-400">
+                    <span>Poin digunakan -{lastTransaction?.pointsRedeemed || 0}</span>
+                    <span>-{formatRupiah(lastTransaction?.pointsDiscount || 0)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-base pt-2">
                   <span className="text-slate-700 dark:text-slate-200">TOTAL</span>
                   <span className="text-slate-900 dark:text-slate-100">{formatRupiah(lastTransaction?.total || 0)}</span>
                 </div>
+
                 {lastTransaction?.paymentMethod === 'cash' && (
                   <>
                     <div className="flex justify-between text-xs pt-2">
-                      <span className="text-slate-500 dark:text-slate-400">Tunai</span>
+                      <span className="text-slate-500 dark:text-slate-400">Bayar</span>
                       <span className="text-slate-700 dark:text-slate-300">{formatRupiah(lastTransaction?.amountPaid || 0)}</span>
                     </div>
                     <div className="flex justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -1593,37 +1598,31 @@ export default function POSPage() {
                     </div>
                   </>
                 )}
+
+                <div className="flex justify-between text-xs pt-1">
+                  <span className="text-slate-600 dark:text-slate-400">Metode Pembayaran</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{getPaymentMethodLabel(lastTransaction?.paymentMethod || '')}</span>
+                </div>
+
                 {lastTransaction?.customerType === "member" && (
-                  <div className="pt-2 border-t border-dashed border-slate-200 dark:border-slate-700 space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400">Status</span>
-                      <span className="font-bold text-slate-900 dark:text-slate-100">Member</span>
-                    </div>
+                  <>
                     {(lastTransaction?.earnedPoints || 0) > 0 && (
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">Poin didapat</span>
+                        <span className="text-slate-500 dark:text-slate-400">Poin</span>
                         <span className="font-bold text-amber-600 dark:text-amber-400">
-                          {(lastTransaction?.earnedPoints || 0).toLocaleString('id-ID')} poin
-                        </span>
-                      </div>
-                    )}
-                    {(lastTransaction?.pointsRedeemed || 0) > 0 && (
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">Poin ditukar</span>
-                        <span className="font-bold text-amber-600 dark:text-amber-400">
-                          {(lastTransaction?.pointsRedeemed || 0).toLocaleString('id-ID')} poin
+                          +{(lastTransaction?.earnedPoints || 0).toLocaleString('id-ID')}
                         </span>
                       </div>
                     )}
                     {((lastTransaction?.finalCustomerPoints || 0) > 0 || (lastTransaction?.earnedPoints || 0) > 0 || (lastTransaction?.pointsRedeemed || 0) > 0) && (
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-500 dark:text-slate-400">Saldo poin</span>
+                        <span className="text-slate-500 dark:text-slate-400">Total Poin</span>
                         <span className="font-bold text-amber-600 dark:text-amber-400">
-                          {(lastTransaction?.finalCustomerPoints || 0).toLocaleString('id-ID')} poin
+                          {(lastTransaction?.finalCustomerPoints || 0).toLocaleString('id-ID')}
                         </span>
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
