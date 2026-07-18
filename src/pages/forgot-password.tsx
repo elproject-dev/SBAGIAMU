@@ -41,12 +41,11 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const origin = Capacitor.isNativePlatform() 
-        ? 'https://elproject-dev.github.io' 
-        : window.location.origin;
+      // Selalu arahkan ke web GitHub Pages untuk reset password agar link di email bisa dibuka di browser
+      const redirectToUrl = 'https://elproject-dev.github.io/SBAGIAMU/update-password';
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}${import.meta.env.BASE_URL}update-password`,
+        redirectTo: redirectToUrl,
       });
 
       if (error) throw error;
