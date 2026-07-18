@@ -75,7 +75,7 @@ export default function POSPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | undefined>();
-  
+
   // Refs for drag-to-scroll functionality
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -341,6 +341,7 @@ export default function POSPage() {
       const printData = {
         ...transaction,
         storeName: activeOutletObj?.store_name || activeOutletObj?.name || localStorage.getItem('storeName') || 'SBAGIAMU',
+        outletName: activeOutletObj?.name || 'Global',
         storeAddress: activeOutletObj?.address || localStorage.getItem('storeAddress') || '',
         storePhone: activeOutletObj?.phone || localStorage.getItem('storePhone') || '',
         footerMessage: showFooter ? (activeOutletObj?.footer_message || localStorage.getItem('footerMessage') || 'Terima kasih atas kunjungan Anda') : '',
@@ -405,11 +406,11 @@ export default function POSPage() {
   const getProductImageUrl = (product: any, size: 'small' | 'thumb' | 'full' = 'full'): string | null => {
     const imageUrl = product.image_url || product.imageUrl;
     if (!imageUrl) return null;
-    
+
     let options = undefined;
     if (size === 'small') options = { width: 200, height: 200 };
     if (size === 'thumb') options = { width: 100, height: 100 };
-    
+
     return getProductImageUrlFromStorage(imageUrl, options);
   };
 
@@ -430,7 +431,7 @@ export default function POSPage() {
   const handlePointsRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     let cleanValue = rawValue.replace(/[^0-9]/g, '');
-    
+
     if (cleanValue !== "") {
       const numValue = parseInt(cleanValue);
       if (maxPointsPerTransaction > 0 && numValue > maxPointsPerTransaction) {
@@ -442,13 +443,13 @@ export default function POSPage() {
         });
       }
     }
-    
+
     setPointsToRedeem(cleanValue);
   };
 
   const addToCart = (product: any) => {
     const imageUrl = getProductImageUrl(product, 'thumb');
-    
+
     // Tampilkan notifikasi di luar state updater untuk menghindari warning render phase
     toast({
       title: product.name,
@@ -878,7 +879,7 @@ export default function POSPage() {
             </div>
 
             {/* Category Filter */}
-            <div 
+            <div
               ref={categoryScrollRef}
               className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide pt-2 cursor-grab active:cursor-grabbing"
               onWheel={(e) => {
@@ -956,24 +957,24 @@ export default function POSPage() {
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                   {products?.map(product => {
-                   const imageUrl = getProductImageUrl(product, 'small');
-                   return (
-                     <div
-                       key={product.id}
-                       className="p-[3px] rounded-xl hover:scale-105 transition-transform duration-200 cursor-pointer"
-                       onClick={() => addToCart(product)}
-                     >
-                       <Card
-                         className="overflow-hidden active:scale-95 flex flex-col h-full"
-                       >
-                         <div className="aspect-square w-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center relative">
-                           {imageUrl ? (
-                             <img
-                               src={imageUrl}
-                               alt={product.name}
-                               className="w-full h-full object-cover"
-                               loading="lazy"
-                               onError={(e) => {
+                    const imageUrl = getProductImageUrl(product, 'small');
+                    return (
+                      <div
+                        key={product.id}
+                        className="p-[3px] rounded-xl hover:scale-105 transition-transform duration-200 cursor-pointer"
+                        onClick={() => addToCart(product)}
+                      >
+                        <Card
+                          className="overflow-hidden active:scale-95 flex flex-col h-full"
+                        >
+                          <div className="aspect-square w-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center relative">
+                            {imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                   const parent = e.currentTarget.parentElement;
                                   if (parent) {

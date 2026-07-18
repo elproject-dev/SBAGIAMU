@@ -73,6 +73,7 @@ export default function DashboardPage() {
   // Default filter values - "all" for both
   const [cashierFilter, setCashierFilter] = useState<string>("all");
   const [outletFilter, setOutletFilter] = useState<string>("all");
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>("all");
 
   // Date filter state
   const [startDate, setStartDate] = useState<string>("");
@@ -83,6 +84,7 @@ export default function DashboardPage() {
 
   const [tempCashierFilter, setTempCashierFilter] = useState<string>("all");
   const [tempOutletFilter, setTempOutletFilter] = useState<string>("all");
+  const [tempPaymentMethodFilter, setTempPaymentMethodFilter] = useState<string>("all");
   const [memberProductOutletFilter, setMemberProductOutletFilter] = useState<string>("all");
   const [memberProductDayFilter, setMemberProductDayFilter] = useState<string>("all");
   const [isMemberProductFilterOpen, setIsMemberProductFilterOpen] = useState(false);
@@ -111,19 +113,22 @@ export default function DashboardPage() {
       setTempEndDate(endDate);
       setTempCashierFilter(cashierFilter);
       setTempOutletFilter(outletFilter);
+      setTempPaymentMethodFilter(paymentMethodFilter);
     }
-  }, [isDateFilterOpen]);
+  }, [isDateFilterOpen, startDate, endDate, cashierFilter, outletFilter, paymentMethodFilter]);
 
   // Reset filters to default
   const handleResetFilters = () => {
     setCashierFilter("all");
     setOutletFilter("all");
+    setPaymentMethodFilter("all");
     setStartDate("");
     setEndDate("");
     setTempStartDate("");
     setTempEndDate("");
     setTempCashierFilter("all");
     setTempOutletFilter("all");
+    setTempPaymentMethodFilter("all");
   };
 
   const handleApplyDateFilter = () => {
@@ -131,6 +136,7 @@ export default function DashboardPage() {
     setEndDate(tempEndDate);
     setCashierFilter(tempCashierFilter);
     setOutletFilter(tempOutletFilter);
+    setPaymentMethodFilter(tempPaymentMethodFilter);
     setIsDateFilterOpen(false);
   };
 
@@ -139,6 +145,7 @@ export default function DashboardPage() {
     setTempEndDate("");
     setTempCashierFilter("all");
     setTempOutletFilter("all");
+    setTempPaymentMethodFilter("all");
     // Do not close popup automatically, let user click Apply to confirm reset
   };
 
@@ -168,7 +175,7 @@ export default function DashboardPage() {
   }, [tempOutletFilter, filterStaffList]);
 
   // Bundle all filter parameters including date range
-  const filterParams = { cashierFilter, outletFilter, startDate, endDate, memberProductOutletFilter, memberProductDayFilter, generalProductOutletFilter, generalProductDayFilter, hourlyOutletFilter, hourlyDayFilter, outletPerformanceDayFilter, topCustomersOutletFilter };
+  const filterParams = { cashierFilter, outletFilter, paymentMethodFilter, startDate, endDate, memberProductOutletFilter, memberProductDayFilter, generalProductOutletFilter, generalProductDayFilter, hourlyOutletFilter, hourlyDayFilter, outletPerformanceDayFilter, topCustomersOutletFilter };
 
   const { data: stats } = useGetDashboardStats(filterParams);
   // Get all transactions for Excel export (without outlet filter)
@@ -378,6 +385,24 @@ export default function DashboardPage() {
                       </div>
                     </>
                   )}
+                  
+                  {/* Payment Method Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-slate-500">Metode Pembayaran</Label>
+                    <Select value={tempPaymentMethodFilter} onValueChange={setTempPaymentMethodFilter}>
+                      <SelectTrigger className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
+                        <CreditCard className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+                        <SelectValue placeholder="Semua Pembayaran" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Semua Pembayaran</SelectItem>
+                        <SelectItem value="cash">Tunai</SelectItem>
+                        <SelectItem value="qris">QRIS</SelectItem>
+                        <SelectItem value="transfer">Transfer</SelectItem>
+                        <SelectItem value="debit_card">Debit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="flex gap-2 justify-end mt-6">

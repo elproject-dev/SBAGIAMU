@@ -294,7 +294,7 @@ export function formatReceipt(transaction: any): string {
 
   receipt += formatLine('No.ID', id ? formatInvoiceNumber(id) : '-', PAPER_WIDTH) + '\n';
   receipt += formatLine('Waktu', waktuStr, PAPER_WIDTH) + '\n';
-  receipt += formatLine('Outlet', transaction.outletName || 'Malioboro', PAPER_WIDTH) + '\n';
+  receipt += formatLine('Outlet', transaction.outletName || transaction.storeName || 'Malioboro', PAPER_WIDTH) + '\n';
 
   if (transaction.orderType && transaction.orderType !== 'belum_dipilih') {
     const orderTypeLabel = transaction.orderType === 'dine_in' ? 'Dine In' : transaction.orderType === 'take_away' ? 'Take Away' : transaction.orderType;

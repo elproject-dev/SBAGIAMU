@@ -101,6 +101,11 @@ export const useGetDashboardStats = (params?: any) => {
         transactionsQuery = transactionsQuery.eq('outlet_id', parseInt(params.outletFilter));
       }
 
+      // Apply payment method filter if specified
+      if (params?.paymentMethodFilter && params.paymentMethodFilter !== 'all') {
+        transactionsQuery = transactionsQuery.eq('payment_method', params.paymentMethodFilter);
+      }
+
       const { data: transactions, error: transactionsError } = await transactionsQuery;
 
       // Customers adalah data bersama - tidak pakai filter tenant
@@ -156,7 +161,7 @@ export const useGetDashboardStats = (params?: any) => {
 
   useEffect(() => {
     fetchStats();
-  }, [params?.cashierFilter, params?.outletFilter]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter, params?.startDate, params?.endDate]);
 
   // Realtime subscription for new transactions
   useEffect(() => {
@@ -180,7 +185,7 @@ export const useGetDashboardStats = (params?: any) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [params?.cashierFilter, params?.outletFilter]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter]);
 
   return { data, isLoading, error };
 };
@@ -217,6 +222,11 @@ export const useGetTopProducts = (params?: any) => {
       // Apply outlet filter if specified
       if (params?.outletFilter && params.outletFilter !== 'all') {
         transactionsQuery = transactionsQuery.eq('outlet_id', parseInt(params.outletFilter));
+      }
+
+      // Apply payment method filter if specified
+      if (params?.paymentMethodFilter && params.paymentMethodFilter !== 'all') {
+        transactionsQuery = transactionsQuery.eq('payment_method', params.paymentMethodFilter);
       }
 
       const { data: transactions, error: transactionsError } = await transactionsQuery;
@@ -289,7 +299,7 @@ export const useGetTopProducts = (params?: any) => {
 
   useEffect(() => {
     fetchTopProducts();
-  }, [params?.cashierFilter, params?.outletFilter, params?.startDate, params?.endDate]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter, params?.startDate, params?.endDate]);
 
   // Realtime subscription for new transactions
   useEffect(() => {
@@ -312,7 +322,7 @@ export const useGetTopProducts = (params?: any) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [params?.cashierFilter, params?.outletFilter]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter]);
 
   return { data, isLoading, error };
 };
@@ -351,6 +361,11 @@ export const useGetRecentTransactions = (params?: any) => {
         query = query.eq('outlet_id', parseInt(params.outletFilter));
       }
 
+      // Apply payment method filter if specified
+      if (params?.paymentMethodFilter && params.paymentMethodFilter !== 'all') {
+        query = query.eq('payment_method', params.paymentMethodFilter);
+      }
+
       const { data: transactions, error } = await query;
 
       if (error) {
@@ -386,7 +401,7 @@ export const useGetRecentTransactions = (params?: any) => {
 
   useEffect(() => {
     fetchRecentTransactions();
-  }, [params?.cashierFilter, params?.outletFilter, params?.startDate, params?.endDate]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter, params?.startDate, params?.endDate]);
 
   // Realtime subscription for new transactions
   useEffect(() => {
@@ -410,7 +425,7 @@ export const useGetRecentTransactions = (params?: any) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [params?.cashierFilter, params?.outletFilter]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter]);
 
   return { data, isLoading, error };
 };
@@ -462,6 +477,11 @@ export const useGetRevenueChart = (params?: any) => {
         query = query.eq('outlet_id', parseInt(params.outletFilter));
       }
 
+      // Apply payment method filter if specified
+      if (params?.paymentMethodFilter && params.paymentMethodFilter !== 'all') {
+        query = query.eq('payment_method', params.paymentMethodFilter);
+      }
+
       const { data: transactions, error } = await query;
 
       if (error) throw error;
@@ -498,7 +518,7 @@ export const useGetRevenueChart = (params?: any) => {
 
   useEffect(() => {
     fetchRevenueData();
-  }, [params?.cashierFilter, params?.outletFilter, params?.startDate, params?.endDate]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter, params?.startDate, params?.endDate]);
 
   // Realtime subscription for new transactions
   useEffect(() => {
@@ -522,7 +542,7 @@ export const useGetRevenueChart = (params?: any) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [params?.cashierFilter, params?.outletFilter]);
+  }, [params?.cashierFilter, params?.outletFilter, params?.paymentMethodFilter]);
 
   return { data, isLoading, error };
 };

@@ -133,6 +133,7 @@ export default function TransactionDetailPage() {
         change: trx.change || 0,
         paymentMethod: trx.payment_method || 'cash',
         storeName: displayedStoreName,
+        outletName: trx?.outlets?.name || 'Global',
         storeAddress: displayedAddress,
         storePhone: displayedPhone,
         footerMessage: showFooter ? (trx?.outlets?.footer_message || localStorage.getItem('footerMessage') || 'Terima kasih atas kunjungan Anda') : '',
