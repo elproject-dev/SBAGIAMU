@@ -135,8 +135,8 @@ async function runDesktopRelease() {
 
     const { error: dbError2 } = await supabase
       .from('app_config')
-      .upsert({ key: 'download_url', value: downloadUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-    if (dbError2) throw new Error(`Gagal update download_url: ${dbError2.message}`);
+      .upsert({ key: 'download_url_desktop', value: downloadUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (dbError2) throw new Error(`Gagal update download_url_desktop: ${dbError2.message}`);
 
     console.log('✅ Rilis Desktop berhasil! File updater.json dan database sudah diperbarui.');
   } catch (error) {
