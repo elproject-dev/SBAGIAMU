@@ -1,6 +1,6 @@
 {
   "productName": "Sbagiamu",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "identifier": "com.sbagiamu.kasir",
   "build": {
     "frontendDist": "../dist",

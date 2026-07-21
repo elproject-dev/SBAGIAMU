@@ -1010,11 +1010,11 @@ export const useListTransactions = (params?: any) => {
   const query = useQuery({
     queryKey: ['transactions', params],
     queryFn: async () => {
-      // First, get total count with the same filters (but no limit/offset)
+      // First, get total count and total amount with the same filters (but no limit/offset)
       let countQuery = applyTenantFilter(
         supabase
           .from('transactions')
-          .select('id', { count: 'exact', head: true })
+          .select('subtotal, tax, discount, points_used', { count: 'exact' })
       );
 
       if (params?.paymentMethod) {
@@ -1037,8 +1037,13 @@ export const useListTransactions = (params?: any) => {
         countQuery = countQuery.gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
       }
 
-      const { count, error: countError } = await countQuery;
+      const { data: summaryData, count, error: countError } = await countQuery;
       if (countError) throw countError;
+
+      const pointsValue = parseInt(localStorage.getItem('pointsValue') || '1000');
+      const totalAmount = (summaryData || []).reduce((sum: number, trx: any) => {
+        return sum + getTransactionTotal(trx, pointsValue);
+      }, 0);
 
       // Then fetch paginated data
       let dataQuery = applyTenantFilter(
@@ -1079,13 +1084,14 @@ export const useListTransactions = (params?: any) => {
       const { data, error } = await dataQuery;
       if (error) throw error;
 
-      return { data: data || [], totalCount: count || 0 };
+      return { data: data || [], totalCount: count || 0, totalAmount };
     }
   });
 
   return { 
     data: query.data?.data || [], 
     totalCount: query.data?.totalCount || 0, 
+    totalAmount: query.data?.totalAmount || 0,
     isLoading: query.isLoading, 
     error: query.error, 
     refetch: query.refetch 

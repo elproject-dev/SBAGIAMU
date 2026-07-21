@@ -77,7 +77,7 @@ export default function TransactionsPage() {
   // Get outlets for filter
   const { data: outlets } = useListOutlets();
 
-  const { data: transactions, isLoading, refetch } = useListTransactions({
+  const { data: transactions, totalCount, totalAmount, isLoading, refetch } = useListTransactions({
     paymentMethod: paymentMethod === "all" ? undefined : paymentMethod,
     outletFilter: outletFilter === "all" ? undefined : outletFilter,
     cashierFilter: cashierFilter === "all" ? undefined : cashierFilter,
@@ -120,7 +120,7 @@ export default function TransactionsPage() {
           .from("transactions")
           .select("cashier_name")
           .not("cashier_name", "is", null);
-          
+
         if (!error && data) {
           const uniqueCashiers = [...new Set(data.map(t => t.cashier_name))].filter(Boolean) as string[];
           setCashiers(uniqueCashiers);
@@ -199,7 +199,7 @@ export default function TransactionsPage() {
               <PopoverContent align="end" className="w-[340px] max-w-[95vw] sm:w-[400px] p-4 sm:rounded-2xl shadow-xl">
                 <div className="space-y-4">
                   <div className="font-semibold text-sm mb-2">Filter Data</div>
-                  
+
                   {/* Date Filters */}
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-slate-500">Rentang Tanggal</label>
@@ -217,7 +217,7 @@ export default function TransactionsPage() {
                           value={startDate}
                           onChange={(e: any) => { setStartDate(e.target.value); setPage(1); }}
                           onClick={(e: any) => {
-                            try { e.target.showPicker?.(); } catch(err){}
+                            try { e.target.showPicker?.(); } catch (err) { }
                           }}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           title="Tanggal Mulai"
@@ -237,7 +237,7 @@ export default function TransactionsPage() {
                           value={endDate}
                           onChange={(e: any) => { setEndDate(e.target.value); setPage(1); }}
                           onClick={(e: any) => {
-                            try { e.target.showPicker?.(); } catch(err){}
+                            try { e.target.showPicker?.(); } catch (err) { }
                           }}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           title="Tanggal Akhir"
@@ -313,6 +313,32 @@ export default function TransactionsPage() {
         </div>
 
         <div className="p-4 sm:p-6 flex-1 overflow-x-hidden pb-20">
+
+          {/* Info Summary Cards for Filtered Transactions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg text-primary">
+                <History className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Transaksi</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {isLoading ? "..." : `${totalCount} Transaksi`}
+                </h3>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg text-primary">
+                <Banknote className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Nilai Transaksi</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {isLoading ? "..." : formatRupiah(totalAmount)}
+                </h3>
+              </div>
+            </div>
+          </div>
 
           {/* ── MOBILE & TABLET: Card List ── */}
           <div className="flex flex-col gap-3 lg:hidden">
